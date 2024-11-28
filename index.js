@@ -38,18 +38,6 @@ TBMはツールボックスミーティングの略で、KYは「危険予知」
 TBM-KYの4ラウンド法に従い、事故防止の対策案をシェアした後には代理人さんに「具体的な行動目標の設定」を行うよう促してください。`;
 const VOICE = 'verse';
 const PORT = process.env.PORT || 5050; // Allow dynamic port assignment
-const HOST = '0.0.0.0';  // Important for Azure
-
-fastify.listen({ 
-    port: PORT,
-    host: HOST 
-}, (err) => {
-    if (err) {
-        console.error(err);
-        process.exit(1);
-    }
-    console.log(`Server is listening on port ${PORT}`);
-});
 
 // List of Event Types to log to the console. See the OpenAI Realtime API Documentation: https://platform.openai.com/docs/api-reference/realtime
 const LOG_EVENT_TYPES = [
@@ -72,16 +60,41 @@ fastify.get('/', async (request, reply) => {
 });
 
 // Route for Twilio to handle incoming calls
-// <Say> punctuation to improve text-to-speech translation
 fastify.all('/incoming-call', async (request, reply) => {
     const twimlResponse = `<?xml version="1.0" encoding="UTF-8"?>
                           <Response>
-                              <Connect>
-                                  <Stream url="wss://${request.headers.host}/media-stream" />
-                              </Connect>
+                              <Gather numDigits="4" action="/verify-password" method="POST">
+                                <Pause length="2" />
+                                <Say language="ja-JP">パスワードを入力してください</Say>
+                              </Gather>
+                              <Say language="ja-JP">パスワードが入力されませんでした。もう一度おかけ直しください。</Say>
+                              <Hangup/>
                           </Response>`;
 
     reply.type('text/xml').send(twimlResponse);
+});
+
+// New route to verify password
+fastify.post('/verify-password', async (request, reply) => {
+    const digits = request.body.Digits;
+    const correctPassword = process.env.VOICE_PASSWORD || '1234'; // Default password is 1234
+
+    if (digits === correctPassword) {
+        const twimlResponse = `<?xml version="1.0" encoding="UTF-8"?>
+                              <Response>
+                                  <Connect>
+                                      <Stream url="wss://${request.headers.host}/media-stream" />
+                                  </Connect>
+                              </Response>`;
+        reply.type('text/xml').send(twimlResponse);
+    } else {
+        const twimlResponse = `<?xml version="1.0" encoding="UTF-8"?>
+                              <Response>
+                                  <Say language="ja-JP">パスワードが正しくありません。もう一度おかけ直しください。</Say>
+                                  <Hangup/>
+                              </Response>`;
+        reply.type('text/xml').send(twimlResponse);
+    }
 });
 
 // WebSocket route for media-stream
