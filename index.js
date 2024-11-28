@@ -38,6 +38,18 @@ TBMはツールボックスミーティングの略で、KYは「危険予知」
 TBM-KYの4ラウンド法に従い、事故防止の対策案をシェアした後には代理人さんに「具体的な行動目標の設定」を行うよう促してください。`;
 const VOICE = 'verse';
 const PORT = process.env.PORT || 5050; // Allow dynamic port assignment
+const HOST = '0.0.0.0';  // Important for Azure
+
+fastify.listen({ 
+    port: PORT,
+    host: HOST 
+}, (err) => {
+    if (err) {
+        console.error(err);
+        process.exit(1);
+    }
+    console.log(`Server is listening on port ${PORT}`);
+});
 
 // List of Event Types to log to the console. See the OpenAI Realtime API Documentation: https://platform.openai.com/docs/api-reference/realtime
 const LOG_EVENT_TYPES = [
