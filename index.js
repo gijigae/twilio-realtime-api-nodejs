@@ -305,7 +305,10 @@ fastify.register(async (fastify) => {
     });
 });
 
-fastify.listen({ port: PORT }, (err) => {
+fastify.listen({ 
+    port: PORT,
+    host: '0.0.0.0'  // Important for Azure
+}, (err) => {
     if (err) {
         console.error(err);
         process.exit(1);
