@@ -21,8 +21,22 @@ fastify.register(fastifyFormBody);
 fastify.register(fastifyWs);
 
 // Constants
-const SYSTEM_MESSAGE = 'You are a helpful and bubbly AI assistant who loves to chat about anything the user is interested about and is prepared to offer them facts. You have a penchant for dad jokes, owl jokes, and rickrolling – subtly. Always stay positive, but work in a joke when appropriate.';
-const VOICE = 'alloy';
+const SYSTEM_MESSAGE = `電力各社の作業現場では労働災害を減らすため毎朝その日の作業内容に対し、TBM-KY活動を行っています。
+TBMはツールボックスミーティングの略で、KYは「危険予知」の略語です。
+
+危険予知訓練の手法である4ラウンド法では、「危険要因の発見→特に危険なポイントの絞り込み→事故防止の対策案→具体的な行動目標の設定」の順にTBM-KYを実施します。
+あなたはTBM-KY活動の優秀なマイスターです。労働災害におけるありとあらゆる場面のリスクに熟知していて、災害対策を考える専門家です。
+
+本日のTBM-KYには複数名の代理人さんが参加します。労働者の安全と健康を守るためにさまざまな法律が制定されています。
+主な法令は<遵守すべき法令一覧>を参照してください。これらの法令は、事業主および労働者が遵守すべき基準や指針を提供し、労働環境の安全性を確保します。労働災害のリスクや対策を述べるときは関連法令を引用するようにしてください。
+
+まずは代理人さんに本日の作業内容について聞いてください。その後、当該作業には、どのような危険がひそんでいると考えられるか重要なポイントを3つに絞って教えてください。
+それから、作業員の考えはいかがでしょうか？と尋ねてください。
+
+作業員の方に考える時間を与え、重要なポイントを一つ絞るとそのポイントについてリスクや対策を教えてください。
+
+TBM-KYの4ラウンド法に従い、事故防止の対策案をシェアした後には代理人さんに「具体的な行動目標の設定」を行うよう促してください。`;
+const VOICE = 'verse';
 const PORT = process.env.PORT || 5050; // Allow dynamic port assignment
 
 // List of Event Types to log to the console. See the OpenAI Realtime API Documentation: https://platform.openai.com/docs/api-reference/realtime
@@ -50,9 +64,6 @@ fastify.get('/', async (request, reply) => {
 fastify.all('/incoming-call', async (request, reply) => {
     const twimlResponse = `<?xml version="1.0" encoding="UTF-8"?>
                           <Response>
-                              <Say>Please wait while we connect your call to the A. I. voice assistant, powered by Twilio and the Open-A.I. Realtime API</Say>
-                              <Pause length="1"/>
-                              <Say>O.K. you can start talking!</Say>
                               <Connect>
                                   <Stream url="wss://${request.headers.host}/media-stream" />
                               </Connect>
@@ -99,7 +110,7 @@ fastify.register(async (fastify) => {
             openAiWs.send(JSON.stringify(sessionUpdate));
 
             // Uncomment the following line to have AI speak first:
-            // sendInitialConversationItem();
+            sendInitialConversationItem();
         };
 
         // Send initial conversation item if AI talks first
@@ -112,7 +123,11 @@ fastify.register(async (fastify) => {
                     content: [
                         {
                             type: 'input_text',
-                            text: 'Greet the user with "Hello there! I am an AI voice assistant powered by Twilio and the OpenAI Realtime API. You can ask me for facts, jokes, or anything you can imagine. How can I help you?"'
+                            text: 'あなたは電力会社の安全マイスターです。' +
+                                '本日の作業内容に基づいて、リスクや注意すべき点、そして対策を説明する役割を担っています。' +
+                                '必要に応じて関連法令や過去の災害事例も参考にしてください。 ' +
+                                '作業内容について不明な点があれば作業員に聞くこと。' +
+                                '"東京電力の安全マイスターです。本日の作業内容を教えてください。"'
                         }
                     ]
                 }
