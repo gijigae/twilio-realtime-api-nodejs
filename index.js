@@ -37,7 +37,8 @@ TBMはツールボックスミーティングの略で、KYは「危険予知」
 
 TBM-KYの4ラウンド法に従い、事故防止の対策案をシェアした後には代理人さんに「具体的な行動目標の設定」を行うよう促してください。`;
 const VOICE = 'verse';
-const PORT = process.env.PORT || 5050; // Allow dynamic port assignment
+const PORT = process.env.PORT || 8181;  // Change default from 5050 to 8181
+const HOST = '0.0.0.0';
 
 // List of Event Types to log to the console. See the OpenAI Realtime API Documentation: https://platform.openai.com/docs/api-reference/realtime
 const LOG_EVENT_TYPES = [
@@ -307,7 +308,7 @@ fastify.register(async (fastify) => {
 
 fastify.listen({ 
     port: PORT,
-    host: '0.0.0.0'  // Important for Azure
+    host: HOST
 }, (err) => {
     if (err) {
         console.error(err);
